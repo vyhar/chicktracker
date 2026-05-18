@@ -1,0 +1,16 @@
+const HATCH = [
+  { date: "2026-03-03", breed: "Cornish", pct: 41.7 },
+  { date: "2026-03-10", breed: "Cornish", pct: 33.5 },
+  { date: "2026-03-17", breed: "Cornish", pct: 65.3 },
+  { date: "2026-03-17", breed: "Ranger", pct: 30.0 },
+  { date: "2026-03-24", breed: "Cornish", pct: 40.3 },
+  { date: "2026-03-31", breed: "Cornish", pct: 32.5 },
+  { date: "2026-03-31", breed: "Rhode Island", pct: 65.7 },
+  { date: "2026-04-07", breed: "Cornish", pct: 64.0 },
+  { date: "2026-04-07", breed: "Ranger", pct: 31.0 },
+  { date: "2026-04-14", breed: "Cornish", pct: 16.0 },
+  { date: "2026-04-21", breed: "Cornish", pct: 15.6 },
+  { date: "2026-04-28", breed: "Cornish", pct: 6.0 },
+  { date: "2026-05-05", breed: "Cornish", pct: 48.6 },
+  { date: "2026-05-12", breed: "Cornish", pct: 53.0 },
+];

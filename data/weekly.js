@@ -1,0 +1,1 @@
+const WEEKLY = [{"Week":10,"Total DOA":25},{"Week":11,"Total DOA":67},{"Week":12,"Total DOA":144},{"Week":13,"Total DOA":305},{"Week":14,"Total DOA":300},{"Week":15,"Total DOA":82},{"Week":16,"Total DOA":123},{"Week":17,"Total DOA":40},{"Week":18,"Total DOA":3},{"Week":19,"Total DOA":551},{"Week":20,"Total DOA":92}];

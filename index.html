@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chick Tracker Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="logo">
+        <div class="logo-icon">🐣</div>
+        <div>
+          <div class="logo-text">Chick Tracker</div>
+          <div class="logo-sub">2026 SEASON · LIVE DATA</div>
+        </div>
+      </div>
+
+      <div class="view-toggle">
+        <button
+          class="toggle-btn active"
+          onclick="switchView('loss')"
+          id="btn-loss"
+        >
+          Chick Loss Tracker
+        </button>
+        <button class="toggle-btn" onclick="switchView('hatch')" id="btn-hatch">
+          Hatchability
+        </button>
+      </div>
+    </header>
+
+    <main class="main">
+      <!-- ═══════════════════════════ LOSS VIEW ═══════════════════════════ -->
+      <div id="loss-view">
+        <div class="kpi-row">
+          <div class="kpi-card red">
+            <div class="kpi-label">Total DOA</div>
+            <div class="kpi-value" style="color: var(--danger)" id="kpi-doa">
+              —
+            </div>
+            <div class="kpi-sub">across all shipments</div>
+          </div>
+          <div class="kpi-card amber">
+            <div class="kpi-label">
+              Avg
+              <span class="has-tip"
+                >DOA %
+                <span class="tip-popup">
+                  <span class="tip-title">DOA % (Dead on Arrival)</span>
+                  Percentage of chicks that were reported dead within 48 hours
+                  of delivery. Calculated as DOA ÷ Original Quantity shipped.
+                </span>
+              </span>
+            </div>
+            <div class="kpi-value" style="color: var(--warn)" id="kpi-avg-doa">
+              —
+            </div>
+            <div class="kpi-sub">mean loss rate</div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-label">Total Survived</div>
+            <div
+              class="kpi-value"
+              style="color: var(--accent)"
+              id="kpi-survived"
+            >
+              —
+            </div>
+            <div class="kpi-sub">chicks alive</div>
+          </div>
+          <div class="kpi-card blue">
+            <div class="kpi-label">Shipments</div>
+            <div class="kpi-value" style="color: var(--info)" id="kpi-count">
+              —
+            </div>
+            <div class="kpi-sub">total records</div>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Weekly DOA trend</div>
+                <div class="card-sub">by calendar week</div>
+              </div>
+            </div>
+            <div style="position: relative; height: 180px">
+              <canvas
+                id="weeklyChart"
+                role="img"
+                aria-label="Bar chart showing weekly DOA totals from week 10 to week 20"
+                >Weekly DOA trend data.</canvas
+              >
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">DOA by region</div>
+                <div class="card-sub">total dead on arrival</div>
+              </div>
+            </div>
+            <div class="region-rows" id="region-bars"></div>
+          </div>
+        </div>
+
+        <!-- SEARCH -->
+        <div class="search-section">
+          <div class="card-header" style="margin-bottom: 14px">
+            <div>
+              <div class="card-title">Search shipments</div>
+              <div class="card-sub">
+                filter by
+                <span class="has-tip"
+                  >hatch date<span class="tip-popup"
+                    ><span class="tip-title">Hatch Date</span>The date chicks
+                    hatched from eggs at the hatchery, typically 7–21 days
+                    before delivery to the customer depending on breed.</span
+                  ></span
+                >
+                to view all shipment details
+              </div>
+            </div>
+          </div>
+          <div class="search-bar">
+            <div class="search-input-wrap">
+              <span class="search-icon">📅</span>
+              <input
+                type="date"
+                class="search-input"
+                id="dateInput"
+                style="padding-left: 36px"
+              />
+            </div>
+            <select class="search-select" id="breedFilter">
+              <option value="">All breeds</option>
+              <option value="Cornish">Cornish Cross</option>
+              <option value="Ranger">Ranger</option>
+              <option value="Rhode Island">Rhode Island Red</option>
+            </select>
+            <select class="search-select" id="regionFilter">
+              <option value="">All regions</option>
+              <option value="South">South</option>
+              <option value="Midwest">Midwest</option>
+              <option value="Southwest">Southwest</option>
+              <option value="Mid Atlantic">Mid Atlantic</option>
+              <option value="West">West</option>
+              <option value="Plains">Plains</option>
+              <option value="Mountains">Mountains</option>
+              <option value="New England">New England</option>
+            </select>
+            <button class="search-btn" onclick="doSearch()">Search</button>
+            <button class="clear-btn" onclick="clearSearch()">Clear</button>
+            <button class="search-btn" onclick="openAddShipmentModal()">
+              + Add Shipment
+            </button>
+          </div>
+
+          <div class="results-info" id="results-info"></div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Hatch Date</th>
+                  <th>Customer</th>
+                  <th>Location</th>
+                  <th>Region</th>
+                  <th>Breed</th>
+                  <th>Orig Qty</th>
+                  <th>
+                    <span class="has-tip" style="color: inherit"
+                      >DOA
+                      <span class="tip-popup">
+                        <span class="tip-title">DOA (Dead on Arrival)</span>
+                        Number of chicks reported dead within 48 hours of
+                        receiving the shipment. Customers must report within
+                        this window for claims to be processed.
+                      </span>
+                    </span>
+                  </th>
+                  <th>Survived</th>
+                  <th>
+                    <span class="has-tip" style="color: inherit"
+                      >DOA %
+                      <span class="tip-popup">
+                        <span class="tip-title">DOA Rate</span>
+                        Percentage of shipped chicks that arrived dead. Industry
+                        benchmark is under 5%. Rates above 25% typically trigger
+                        investigation.
+                      </span>
+                    </span>
+                  </th>
+                  <th>
+                    <span class="has-tip" style="color: inherit"
+                      >Week
+                      <span class="tip-popup">
+                        <span class="tip-title">Shipping Week</span>
+                        Calendar week number of the shipment. Used for tracking
+                        seasonal loss patterns and correlating with weather or
+                        transit conditions.
+                      </span>
+                    </span>
+                  </th>
+                  <th>Phone</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody id="results-tbody">
+                <tr>
+                  <td colspan="12">
+                    <div class="empty-state">
+                      <div class="big">🔍</div>
+                      <p>
+                        Select a hatch date or filter to view shipment records
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- /loss-view -->
+
+      <!-- ═══════════════════════════ HATCH VIEW ═══════════════════════════ -->
+      <div id="hatch-view" style="display: none">
+        <div class="kpi-row">
+          <div class="kpi-card green">
+            <div class="kpi-label">
+              <span class="has-tip"
+                >Avg hatchability %
+                <span class="tip-popup"> </span>
+              </span>
+            </div>
+            <div class="kpi-value" style="color: var(--accent)">75.9%</div>
+            <div class="kpi-sub">season average · 9 hatch dates</div>
+          </div>
+          <div class="kpi-card blue">
+            <div class="kpi-label">Total birds out</div>
+            <div class="kpi-value" style="color: var(--info)">265,734</div>
+            <div class="kpi-sub">shipped + delivered + pickup</div>
+          </div>
+          <div class="kpi-card amber">
+            <div class="kpi-label">
+              <span class="has-tip"
+                >Shipped
+                <span class="tip-popup">
+                  <span class="tip-title">Ship channel</span>
+                </span>
+              </span>
+            </div>
+            <div class="kpi-value" style="color: var(--warn)">80,905</div>
+            <div class="kpi-sub">30.4% of total birds out</div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-label">
+              <span class="has-tip"
+                >Delivery &amp; pickup
+                <span class="tip-popup">
+                  <span class="tip-title">Delivery &amp; pickup</span>
+                </span>
+              </span>
+            </div>
+            <div class="kpi-value" style="color: var(--accent)">184,829</div>
+            <div class="kpi-sub">69.6% of total birds out</div>
+          </div>
+        </div>
+
+        <!-- Main hatchability % trend chart -->
+        <div class="chart-card" style="margin-bottom: 14px">
+          <div class="card-header">
+            <div>
+              <div class="card-title">
+                <span class="has-tip"
+                  >Hatchability % by hatch date
+                  <span class="tip-popup">
+                    <span class="tip-title">Hatchability %</span>
+                  </span>
+                </span>
+              </div>
+              <div class="card-sub">Benchmark 80-90% shown</div>
+            </div>
+            <div class="legend">
+              <div class="legend-item">
+                <div class="legend-dot" style="background: #7fc47a"></div>
+                Hatchability %
+              </div>
+              <div class="legend-item">
+                <div
+                  class="legend-dot"
+                  style="
+                    background: rgba(90, 159, 212, 0.5);
+                    border-radius: 0;
+                    width: 20px;
+                    height: 2px;
+                  "
+                ></div>
+                80% benchmark
+              </div>
+            </div>
+          </div>
+          <div style="position: relative; height: 220px">
+            <canvas
+              id="hatchPctChart"
+              role="img"
+              aria-label="Bar chart of actual hatchability percentage by hatch date, with 80% industry benchmark line"
+              >Hatchability percentage data.</canvas
+            >
+          </div>
+        </div>
+
+        <!-- Per-week detail table + breed breakdown -->
+        <div class="charts-grid" style="margin-bottom: 14px">
+          <!-- Per-week detail -->
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Weekly hatch detail</div>
+                <div class="card-sub">shipped · del/pickup · hatch %</div>
+              </div>
+            </div>
+            <div class="table-wrap" style="border: none">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Hatch date</th>
+                    <th style="text-align: right">
+                      <span class="has-tip"
+                        >Shipped
+                        <!--<span class="tip-popup"><span class="tip-title"></span>.</span>-->
+                      </span>
+                    </th>
+                    <th style="text-align: right">
+                      <span class="has-tip"
+                        >Del &amp; PU
+                        <!--<span class="tip-popup"><span class="tip-title"></span></span>-->
+                      </span>
+                    </th>
+                    <th style="text-align: right">
+                      <span class="has-tip"
+                        >Hatch %
+                        <!-- <span class="tip-popup"><span class="tip-title"></span></span>-->
+                      </span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="hatch-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Breed channel breakdown stacked bars -->
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Breed × channel breakdown</div>
+                <div class="card-sub">
+                  cornish cross vs ranger by fulfillment
+                </div>
+              </div>
+            </div>
+            <div style="position: relative; height: 260px">
+              <canvas
+                id="breedChannelChart"
+                role="img"
+                aria-label="Grouped bar chart comparing Cornish Cross and Ranger chick volumes by ship versus delivery/pickup channel"
+                >Breed channel breakdown.</canvas
+              >
+            </div>
+            <div class="legend" style="margin-top: 12px">
+              <div class="legend-item">
+                <div class="legend-dot" style="background: #7fbde8"></div>
+                Cornish — ship
+              </div>
+              <div class="legend-item">
+                <div
+                  class="legend-dot"
+                  style="background: rgba(127, 189, 232, 0.35)"
+                ></div>
+                Cornish — del/PU
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background: #d4934a"></div>
+                Ranger — ship
+              </div>
+              <div class="legend-item">
+                <div
+                  class="legend-dot"
+                  style="background: rgba(212, 147, 74, 0.35)"
+                ></div>
+                Ranger — del/PU
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <!--<script src="./data/shipments.js"></script>-->
+    <script src="./data/hatch.js"></script>
+    <script src="./data/hatch_weekly.js"></script>
+    <script src="./app.js"></script>
+    <div id="shipment-modal" class="modal hidden">
+      <div class="modal-card">
+        <h2>Add Shipment</h2>
+
+        <input id="new-date" type="date" />
+        <input id="new-customer" placeholder="Customer Name" />
+        <input id="new-city" placeholder="City" />
+        <input id="new-state" placeholder="State" />
+        <input id="new-region" placeholder="Region" />
+        <input id="new-phone" placeholder="Phone" />
+        <input id="new-breed" placeholder="Breed" />
+        <input id="new-qty" type="number" placeholder="Original Qty" />
+        <input id="new-doa" type="number" placeholder="DOA" />
+        <input id="new-week" type="number" placeholder="Week" />
+
+        <textarea id="new-notes" placeholder="Notes"></textarea>
+
+        <div class="modal-actions">
+          <button onclick="saveShipment()">Save</button>
+          <button onclick="closeShipmentModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1 @@
+const REGIONAL = [{"Region":"New England","Total DOA":22},{"Region":"Plains","Total DOA":92},{"Region":"Mountain","Total DOA":0},{"Region":"Mid Atlantic","Total DOA":138},{"Region":"South","Total DOA":579},{"Region":"West","Total DOA":83},{"Region":"Midwest","Total DOA":439},{"Region":"Southwest","Total DOA":187}];
