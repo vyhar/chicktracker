@@ -354,7 +354,7 @@ function buildHatchView() {
 
   // ── Hatchability % bar chart ────────────────────────────────────────
   const barColors = hpcts.map((p) =>
-    p >= 80
+    p >= 75
       ? "rgba(127,196,122,0.75)"
       : p >= 65
         ? "rgba(212,147,74,0.75)"
@@ -375,8 +375,8 @@ function buildHatchView() {
           order: 2,
         },
         {
-          label: "80% benchmark",
-          data: Array(labels.length).fill(80),
+          label: "75% benchmark",
+          data: Array(labels.length).fill(75),
           type: "line",
           borderColor: "rgba(90,159,212,0.6)",
           borderDash: [6, 4],
@@ -397,7 +397,7 @@ function buildHatchView() {
             label: (c) =>
               c.datasetIndex === 0
                 ? ` Hatch rate: ${c.raw}%`
-                : " 80% benchmark",
+                : " 75% benchmark",
           },
         },
       },

@@ -13,4 +13,5 @@ const HATCH = [
   { date: "2026-04-28", breed: "Cornish", pct: 6.0 },
   { date: "2026-05-05", breed: "Cornish", pct: 48.6 },
   { date: "2026-05-12", breed: "Cornish", pct: 53.0 },
+  { date: "2026-05-19", breed: "Cornish", pct: 5.0 },
 ];
