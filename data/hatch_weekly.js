@@ -69,13 +69,13 @@ const HATCH_WEEKLY = [
 
   {
     date:'05-19',
-    ship:4727,
-    delpu:30410,
-    hpct:88.7,
+    ship:3035,
+    delpu:28876,
+    hpct:83.7,
     eggs:39600,
     breeds:{
-      Cornish:{ship:3255, del:10910, pickup:250},
-      Ranger:{ship:1472, del:19000, pickup:250}
+      Cornish:{ship:2900, del:10910, pickup:250},
+      Ranger:{ship:135, del:17956, pickup:550}
     }
   }
 ];
