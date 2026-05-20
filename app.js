@@ -15,8 +15,52 @@ function formatDate(value) {
   return d.toISOString().split("T")[0];
 }
 
+function calculateMonthlyDOAAverages(data) {
+  const monthly = {};
+
+  data.forEach((row) => {
+    const date = new Date(
+      row["Hatch Date"] || row.HatchDate
+    );
+
+    const monthKey =
+      `${date.getFullYear()}-${date.getMonth()}`;
+
+    const doa = Number(row.DOA || 0);
+
+    const qty = Number(
+      row["Orig Qty"] ||
+      row.OriginalQty ||
+      0
+    );
+
+    if (!monthly[monthKey]) {
+      monthly[monthKey] = {
+        totalDOA: 0,
+        totalQty: 0,
+      };
+    }
+
+    monthly[monthKey].totalDOA += doa;
+
+    monthly[monthKey].totalQty += qty;
+  });
+
+  return Object.values(monthly).map((m) => ({
+    avgDOA:
+      m.totalQty > 0
+        ? Number(
+            (
+              (m.totalDOA / m.totalQty) * 100
+            ).toFixed(2)
+          )
+        : 0,
+  }));
+}
+
 function renderWeeklyChart() {
-  const canvas = document.getElementById("weeklyChart");
+  const canvas =
+    document.getElementById("weeklyChart");
 
   if (!canvas) return;
 
@@ -26,36 +70,212 @@ function renderWeeklyChart() {
 
   const ctx = canvas.getContext("2d");
 
+  const gradient =
+    ctx.createLinearGradient(0, 0, 0, 220);
+
+  gradient.addColorStop(
+    0,
+    "rgba(239, 68, 68, 0.9)"
+  );
+
+  gradient.addColorStop(
+    1,
+    "rgba(239, 68, 68, 0.18)"
+  );
+
+const monthly =
+  calculateMonthlyDOAAverages(DATA);
+
+const currentMonthAvg =
+  monthly[monthly.length - 1]?.avgDOA || 0;
+
+  const previousMonthAvg =
+  monthly[monthly.length - 2]?.avgDOA || 0;
+
   weeklyChartInstance = new Chart(ctx, {
     type: "bar",
+
     data: {
-      labels: WEEKLY.map((w) => "Wk " + w.Week),
+      labels: WEEKLY.map(
+        (w) => `${w.Month} · Wk ${w.Week}`
+      ),
+
       datasets: [
         {
-          label: "DOA",
-          data: WEEKLY.map((w) => w["Total DOA"]),
+          type: "bar",
+
+          label: "Weekly DOA %",
+
+          data: WEEKLY.map(
+            (w) => w["DOA %"]
+          ),
+
+          backgroundColor: gradient,
+
+          borderRadius: 10,
+
+          borderSkipped: false,
+
+          hoverBackgroundColor:
+            "rgba(220, 38, 38, 1)",
+
+          maxBarThickness: 34,
+        },
+
+        {
+          type: "line",
+          label:
+  `Current Month Avg Ship (${currentMonthAvg})`,
+
+          data: WEEKLY.map(
+            () => currentMonthAvg
+          ),
+
+          borderColor: "#60a5fa",
+
+          backgroundColor: "#60a5fa",
+
+          borderWidth: 3,
+
+          tension: 0,
+
+          pointRadius: 0,
+        },
+
+        {
+          type: "line",
+         label:
+  `Previous Month Avg Ship (${previousMonthAvg})`,
+
+          data: WEEKLY.map(
+            () => previousMonthAvg
+          ),
+
+          borderColor: "#9ca3af",
+
+          backgroundColor: "#9ca3af",
+
+          borderDash: [6, 6],
+
+          borderWidth: 2,
+
+          tension: 0,
+
+          pointRadius: 0,
         },
       ],
     },
+    options: {
+  responsive: true,
+
+  maintainAspectRatio: false,
+
+  plugins: {
+    legend: {
+      labels: {
+        color: "#d1d5db",
+      },
+    },
+
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+
+          const isPercent =
+            context.dataset.type === "bar";
+
+          return (
+            context.dataset.label +
+            ": " +
+            context.raw +
+            (isPercent ? "%" : "")
+          );
+        },
+      },
+    },
+  },
+
+  scales: {
+    x: {
+      grid: {
+        display: false,
+      },
+    },
+
+    y: {
+      beginAtZero: true,
+
+      position: "left",
+
+      ticks: {
+        callback: function (value) {
+          return value + "%";
+        },
+      },
+    },
+
+    
+  },
+},
   });
 }
 function getWeeklyData() {
-  return Object.values(
-    DATA.reduce((acc, row) => {
-      const week = row.Week;
+  const grouped = {};
 
-      if (!acc[week]) {
-        acc[week] = {
-          Week: week,
-          "Total DOA": 0,
-        };
-      }
+  DATA.forEach((row) => {
+    const week = Number(row.Week);
 
-      acc[week]["Total DOA"] += Number(row.DOA);
+    const doa = Number(row.DOA || 0);
 
-      return acc;
-    }, {}),
-  ).sort((a, b) => a.Week - b.Week);
+    const qty = Number(
+      row["Orig Qty"] ||
+      row.OriginalQty ||
+      0
+    );
+
+    const hatchDate = new Date(
+      row["Hatch Date"] ||
+      row.HatchDate
+    );
+
+    const month =
+      hatchDate.toLocaleString("default", {
+        month: "short",
+      });
+
+    if (!grouped[week]) {
+      grouped[week] = {
+        Week: week,
+
+        Month: month,
+
+        totalDOA: 0,
+
+        totalQty: 0,
+      };
+    }
+
+    grouped[week].totalDOA += doa;
+
+    grouped[week].totalQty += qty;
+  });
+
+  return Object.values(grouped)
+    .map((w) => ({
+      ...w,
+
+      "DOA %":
+        w.totalQty > 0
+          ? Number(
+              (
+                (w.totalDOA / w.totalQty) *
+                100
+              ).toFixed(2)
+            )
+          : 0,
+    }))
+
+    .sort((a, b) => a.Week - b.Week);
 }
 function getRegionalData() {
   return Object.values(
@@ -88,33 +308,143 @@ async function loadData() {
 
   initDashboard();
 }
-function renderRegionalBars() {
-  const container = document.getElementById("region-bars");
+function renderRegionChart() {
+  const canvas =
+    document.getElementById("regionChart");
 
-  if (!container) return;
+  if (!canvas) return;
 
-  const maxRegion = Math.max(...REGIONAL.map((r) => r["Total DOA"]));
+  const ctx = canvas.getContext("2d");
 
-  container.innerHTML = REGIONAL.map((r) => {
-    const width = (r["Total DOA"] / maxRegion) * 100;
+  const regionTotals = {};
 
-    return `
-      <div class="region-row">
-        <div class="region-label">${r.Region}</div>
+  DATA.forEach((row) => {
+    const region = row.Region || "Unknown";
 
-        <div class="region-bar-wrap">
-          <div
-            class="region-bar"
-            style="width:${width}%"
-          ></div>
-        </div>
+    const doa = Number(row.DOA || 0);
 
-        <div class="region-value">
-          ${r["Total DOA"]}
-        </div>
-      </div>
-    `;
-  }).join("");
+    if (!regionTotals[region]) {
+      regionTotals[region] = 0;
+    }
+
+    regionTotals[region] += doa;
+  });
+
+  const sorted = Object.entries(regionTotals)
+    .sort((a, b) => b[1] - a[1]);
+
+  const labels = sorted.map((r) => r[0]);
+
+  const values = sorted.map((r) => r[1]);
+
+  new Chart(ctx, {
+    type: "bar",
+
+    data: {
+      labels,
+
+      datasets: [
+        {
+          label: "Total DOA",
+
+          data: values,
+
+          borderRadius: 10,
+
+          borderSkipped: false,
+
+          backgroundColor: (context) => {
+            const chart = context.chart;
+
+            const {
+              ctx,
+              chartArea,
+            } = chart;
+
+            if (!chartArea) return;
+
+            const gradient =
+              ctx.createLinearGradient(
+                0,
+                0,
+                chartArea.right,
+                0
+              );
+
+            gradient.addColorStop(
+              0,
+              "rgba(239, 68, 68, 0.95)"
+            );
+
+            gradient.addColorStop(
+              1,
+              "rgba(239, 68, 68, 0.25)"
+            );
+
+            return gradient;
+          },
+
+          hoverBackgroundColor:
+            "rgba(220, 38, 38, 1)",
+        },
+      ],
+    },
+
+    options: {
+      indexAxis: "y",
+
+      responsive: true,
+
+      maintainAspectRatio: false,
+
+      plugins: {
+        legend: {
+          display: false,
+        },
+
+        tooltip: {
+          backgroundColor: "#111827",
+
+          titleColor: "#fff",
+
+          bodyColor: "#d1d5db",
+
+          padding: 12,
+
+          cornerRadius: 12,
+        },
+      },
+
+      scales: {
+        x: {
+          beginAtZero: true,
+
+          grid: {
+            color:
+              "rgba(255,255,255,0.05)",
+          },
+
+          ticks: {
+            color: "#9ca3af",
+          },
+        },
+
+        y: {
+          grid: {
+            display: false,
+          },
+
+          ticks: {
+            color: "#d1d5db",
+          },
+        },
+      },
+
+      animation: {
+        duration: 1200,
+      },
+    },
+  });
 }
 function openAddShipmentModal() {
   document.getElementById("shipment-modal").classList.remove("hidden");
@@ -204,27 +534,6 @@ function renderKPIs() {
   document.getElementById("kpi-survived").textContent = totalSurvived;
   document.getElementById("kpi-count").textContent = DATA.length;
 }
-// ─── REGIONAL BARS ───────────────────────────────────────
-const maxRegion = Math.max(...REGIONAL.map((r) => r["Total DOA"]));
-const regionContainer = document.getElementById("region-bars");
-const sortedRegion = [...REGIONAL]
-  .filter((r) => r["Total DOA"] > 0)
-  .sort((a, b) => b["Total DOA"] - a["Total DOA"]);
-sortedRegion.forEach((r) => {
-  const pct = ((r["Total DOA"] / maxRegion) * 100).toFixed(1);
-  const color =
-    r["Total DOA"] > 400
-      ? "#e05a4a"
-      : r["Total DOA"] > 150
-        ? "#d4934a"
-        : "#4a8f45";
-  regionContainer.innerHTML += `
-    <div class="region-row">
-      <div class="region-name">${r.Region}</div>
-      <div class="region-track"><div class="region-fill" style="width:${pct}%;background:${color};"></div></div>
-      <div class="region-val">${r["Total DOA"]}</div>
-    </div>`;
-});
 
 // ─── SEARCH ─────────────────────────────────────────────
 function doSearch() {
@@ -523,7 +832,7 @@ function buildHatchView() {
 function initDashboard() {
   renderKPIs();
   renderWeeklyChart();
-  renderRegionalBars();
+  renderRegionChart();
   buildHatchView();
 }
 loadData();

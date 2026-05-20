@@ -689,7 +689,11 @@ tr:hover td {
   gap: 16px;
   margin-top: 8px;
 }
-
+.chart-wrap-region {
+  position: relative;
+  height: 320px;
+  width: 100%;
+}
 .region-row {
   display: grid;
   grid-template-columns: 90px 1fr 45px;
