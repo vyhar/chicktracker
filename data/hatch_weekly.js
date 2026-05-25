@@ -77,5 +77,16 @@ const HATCH_WEEKLY = [
       Cornish:{ship:2900, del:10910, pickup:250},
       Ranger:{ship:135, del:17956, pickup:550}
     }
+  },
+
+  {
+    date:'05-26',
+    ship:11501,
+    delpu:4655,
+    hpct:90,
+    eggs:18000,
+    breeds:{
+      Cornish:{ship:11501, del:2275, pickup:2380},
   }
+}
 ];
