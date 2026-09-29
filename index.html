@@ -243,12 +243,12 @@
                 <span class="tip-popup"> </span>
               </span>
             </div>
-            <div class="kpi-value" style="color: var(--accent)">75.9%</div>
-            <div class="kpi-sub">season average · 9 hatch dates</div>
+            <div class="kpi-value" style="color: var(--accent)" id="kpi-hatch-avg">—</div>
+            <div class="kpi-sub" id="kpi-hatch-avg-sub">season average</div>
           </div>
           <div class="kpi-card blue">
             <div class="kpi-label">Total birds out</div>
-            <div class="kpi-value" style="color: var(--info)">265,734</div>
+            <div class="kpi-value" style="color: var(--info)" id="kpi-birds-out">—</div>
             <div class="kpi-sub">shipped + delivered + pickup</div>
           </div>
           <div class="kpi-card amber">
@@ -260,8 +260,8 @@
                 </span>
               </span>
             </div>
-            <div class="kpi-value" style="color: var(--warn)">80,905</div>
-            <div class="kpi-sub">30.4% of total birds out</div>
+            <div class="kpi-value" style="color: var(--warn)" id="kpi-shipped">—</div>
+            <div class="kpi-sub" id="kpi-shipped-sub">of total birds out</div>
           </div>
           <div class="kpi-card green">
             <div class="kpi-label">
@@ -272,8 +272,8 @@
                 </span>
               </span>
             </div>
-            <div class="kpi-value" style="color: var(--accent)">184,829</div>
-            <div class="kpi-sub">69.6% of total birds out</div>
+            <div class="kpi-value" style="color: var(--accent)" id="kpi-delpu">—</div>
+            <div class="kpi-sub" id="kpi-delpu-sub">of total birds out</div>
           </div>
         </div>
 
@@ -408,10 +408,6 @@
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-    <!--<script src="./data/shipments.js"></script>-->
-    <script src="./data/hatch.js"></script>
-    <script src="./data/hatch_weekly.js"></script>
     <script src="./app.js"></script>
     <div id="shipment-modal" class="modal hidden">
       <div class="modal-card">
